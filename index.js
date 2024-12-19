@@ -1,19 +1,56 @@
-alert("Hello player!");
-
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 
-canvas.width = 400;
-canvas.height = 400;
+canvas.width = 600;
+canvas.height = 600;
 
 var width = canvas.width;
 var height = canvas.height;
 
-var blockSize = 10;
+var blockSize = 20;
 var widthInBlocks = width / blockSize;
 var heightInBlocks = height / blockSize;
 
 var score = 0;
+var playerName = "";
+
+var intervalId;
+var gameSpeed = 60;
+var speedIncrease = 4;
+
+var gameOver = function (name, score) {
+    clearInterval(intervalId);
+
+    ctx.font = "60px Courier";
+    ctx.fillStyle = "Black";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("Game Over", width / 2, height / 3);
+
+var scores = JSON.parse(localStorage.getItem("snakeScores")) || [];
+scores.push({ name: name, score: score });
+scores.sort((a, b) => b.score - a.score); 
+    
+    localStorage.setItem("snakeScores", JSON.stringify(scores));
+
+    ctx.font = "20px Courier";
+    ctx.fillText("Winner:", width / 2, height / 2);
+    
+    let validScores = scores.filter(record => Number.isInteger(record.score));
+
+    if (validScores.length > 3) { 
+        validScores = validScores.slice(0, 3);
+    }
+
+    validScores.forEach((record, index) => {
+        ctx.fillText(
+            `${index + 1}. ${record.name}: ${record.score}`,
+            width / 2, 
+            (height / 2) + 30 + (index * 25)
+        );
+    });
+};
+
 
 var drawBorder = function () {
     ctx.fillStyle = "Gray";
@@ -29,16 +66,6 @@ var drawScore = function () {
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
     ctx.fillText("Score:" + score, blockSize, blockSize);
-};
-
-var gameOver = function () {
-    clearInterval(intervalId);
-
-    ctx.font = "60px Courier";
-    ctx.fillStyle = "Black";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("Game Over", width / 2, height / 3);
 };
 
 var circle = function (x, y, radius, fillCircle) {
@@ -108,15 +135,27 @@ Snake.prototype.move = function () {
     }
     
     if (this.checkCollision(newHead)) {
-        gameOver();
+        gameOver(playerName, score);
         return;
     }
 
     this.segments.unshift(newHead);
 
     if (newHead.equal(apple.position)) {
-        score ++;
+        score++;
         apple.move();
+        gameSpeed = Math.max(40, gameSpeed - speedIncrease);
+        clearInterval(intervalId);
+        intervalId = setInterval(function () {
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, width, height);
+            drawScore();
+            snake.move();
+            snake.draw();
+            apple.draw();
+            drawBorder();
+        }, gameSpeed);
     } else {
         this.segments.pop();
     }
@@ -176,17 +215,24 @@ var snake = new Snake();
 var apple = new Apple();
 
 
-var intervalId = setInterval(function () {
-    ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = "White";
-    ctx.fillRect(blockSize, blockSize, width - 2 * blockSize, height - 2 * blockSize);
-    drawScore();
-    snake.move();
-    snake.draw();
-    apple.draw();
-    drawBorder();
-}, 100);
-
+var startGame = function() {
+    playerName = prompt("Enter your name:", "Player") || "Player";
+    snake = new Snake();
+    apple = new Apple();
+    score = 0;
+    gameSpeed = 100;
+    
+    intervalId = setInterval(function () {
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, width, height);
+        drawScore();
+        snake.move();
+        snake.draw();
+        apple.draw();
+        drawBorder();
+    }, gameSpeed);
+};
 
 var directions = {
     37: "left",
@@ -201,3 +247,5 @@ $("body").keydown(function (event) {
         snake.setDirection(newDirection);
     }
 });
+
+startGame();
