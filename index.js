@@ -21,6 +21,7 @@ var speedIncrease = 3;
 var isPaused = false;
 
 var gameOver = function (name, score) {
+    pauseButton.style.display = "none";
     clearInterval(intervalId);
 
     ctx.font = "60px Open Sans";
@@ -239,6 +240,7 @@ var apple = new Apple();
 
 var startGame = function() {
     isPaused = false;
+    pauseButton.style.display = "block";
     pauseButton.textContent = "Pause";
     playerName = prompt("Enter your name:", "Player") || "Player";
     snake = new Snake();
@@ -317,6 +319,7 @@ pauseButton.style.top = (canvas.offsetTop - 250) + "px";
 pauseButton.style.padding = "10px 20px";
 pauseButton.style.font = "20px Open Sans";
 pauseButton.style.cursor = "pointer";
+pauseButton.style.display = "none";
 document.body.appendChild(pauseButton);
 
 pauseButton.addEventListener("click", function() {
