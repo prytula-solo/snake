@@ -1,0 +1,58 @@
+ canvas {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid #000;
+ }
+ 
+  body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    background-image: url('./img/jungle.background.webp');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    min-height: 100vh;
+  }
+
+ .game-button {
+    background-color: grey;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font: 20px "Open Sans";
+    cursor: pointer;
+    position: absolute;
+ }
+ 
+ .start-button {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+ }
+ 
+ .pause-button {
+    background-color: grey;
+    border-radius: 10px;
+    position: absolute;
+    left: calc(50% + 280px);
+    top: calc(50% - 250px);
+    padding: 10px 20px;
+    font: 20px "Open Sans";
+    cursor: pointer;
+    display: none;
+ }
+ 
+ .restart-button {
+    background-color: grey;
+    border-radius: 10px;
+    position: absolute;
+    left: 50%;
+    top: calc(50% + 100px);
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    font: 20px "Open Sans";
+    cursor: pointer;
+ }
