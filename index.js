@@ -242,7 +242,11 @@ var startGame = function() {
     isPaused = false;
     pauseButton.style.display = "block";
     pauseButton.textContent = "Pause";
-    playerName = prompt("Enter your name:", "Player") || "Player";
+    
+    if (!playerName) {
+        playerName = prompt("Enter your name:", "Player") || "Player";
+    }
+    
     snake = new Snake();
     apple = new Apple();
     score = 0;
