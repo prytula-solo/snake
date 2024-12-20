@@ -55,15 +55,7 @@ var gameOver = function (name, score) {
 
     var restartButton = document.createElement("button");
     restartButton.textContent = "Restart Game";
-    restartButton.style.backgroundColor = "grey";
-    restartButton.style.borderRadius = "10px";
-    restartButton.style.position = "absolute";
-    restartButton.style.left = "50%";
-    restartButton.style.top = (height / 2) + 200 + "px";
-    restartButton.style.transform = "translateX(-50%)";
-    restartButton.style.padding = "10px 20px";
-    restartButton.style.font = " 20 px Open Sans";
-    restartButton.style.cursor = "pointer";
+    restartButton.classList.add("game-button", "restart-button");
     document.body.appendChild(restartButton);
 
     restartButton.addEventListener("click", function() {
@@ -297,15 +289,7 @@ $("body").keyup(function (event) {
 
 var startButton = document.createElement("button");
 startButton.textContent = "Start Game";
-startButton.style.backgroundColor = "grey";
-startButton.style.borderRadius = "10px";
-startButton.style.position = "absolute";
-startButton.style.left = "50%";
-startButton.style.top = "50%";
-startButton.style.transform = "translate(-50%, -50%)";
-startButton.style.padding = "10px 20px";
-startButton.style.font = "20px Open Sans";
-startButton.style.cursor = "pointer";
+startButton.classList.add("game-button", "start-button");
 document.body.appendChild(startButton);
 
 startButton.addEventListener("click", function() {
@@ -315,15 +299,7 @@ startButton.addEventListener("click", function() {
 
 var pauseButton = document.createElement("button");
 pauseButton.textContent = "Pause";
-pauseButton.style.backgroundColor = "grey";
-pauseButton.style.borderRadius = "10px";
-pauseButton.style.position = "absolute";
-pauseButton.style.left = (canvas.offsetLeft + canvas.width - 200) + "px";
-pauseButton.style.top = (canvas.offsetTop - 250) + "px";
-pauseButton.style.padding = "10px 20px";
-pauseButton.style.font = "20px Open Sans";
-pauseButton.style.cursor = "pointer";
-pauseButton.style.display = "none";
+pauseButton.classList.add("game-button", "pause-button");
 document.body.appendChild(pauseButton);
 
 pauseButton.addEventListener("click", function() {
