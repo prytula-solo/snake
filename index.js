@@ -18,6 +18,8 @@ var intervalId;
 var gameSpeed = 40;
 var speedIncrease = 3;
 
+var isPaused = false;
+
 var gameOver = function (name, score) {
     clearInterval(intervalId);
 
@@ -236,6 +238,8 @@ var apple = new Apple();
 
 
 var startGame = function() {
+    isPaused = false;
+    pauseButton.textContent = "Pause";
     playerName = prompt("Enter your name:", "Player") || "Player";
     snake = new Snake();
     apple = new Apple();
@@ -301,6 +305,40 @@ document.body.appendChild(startButton);
 startButton.addEventListener("click", function() {
     startButton.style.display = "none"; // Hide button when game starts
     startGame();
+});
+
+var pauseButton = document.createElement("button");
+pauseButton.textContent = "Pause";
+pauseButton.style.backgroundColor = "grey";
+pauseButton.style.borderRadius = "10px";
+pauseButton.style.position = "absolute";
+pauseButton.style.left = (canvas.offsetLeft + canvas.width - 200) + "px";
+pauseButton.style.top = (canvas.offsetTop - 250) + "px";
+pauseButton.style.padding = "10px 20px";
+pauseButton.style.font = "20px Open Sans";
+pauseButton.style.cursor = "pointer";
+document.body.appendChild(pauseButton);
+
+pauseButton.addEventListener("click", function() {
+    isPaused = !isPaused;
+    pauseButton.textContent = isPaused ? "Continue" : "Pause";
+    
+    if (!isPaused) {
+        // Resume game
+        intervalId = setInterval(function () {
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = "rgba(0, 50, 0, 0.5)";
+            ctx.fillRect(0, 0, width, height);
+            snake.move();
+            snake.draw();
+            apple.draw();
+            drawBorder();
+            drawScore();
+        }, gameSpeed);
+    } else {
+        // Pause game
+        clearInterval(intervalId);
+    }
 });
 
 // Initial canvas setup
