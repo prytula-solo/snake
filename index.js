@@ -1,40 +1,40 @@
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 
-canvas.width = 600;
-canvas.height = 600;
+canvas.width = 500;
+canvas.height = 500;
 
 var width = canvas.width;
 var height = canvas.height;
 
 var blockSize = 20;
-var widthInBlocks = width / blockSize;
-var heightInBlocks = height / blockSize;
+var widthInBlocks = Math.floor(width / blockSize);
+var heightInBlocks = Math.floor(height / blockSize);
 
 var score = 0;
 var playerName = "";
 
 var intervalId;
-var gameSpeed = 60;
-var speedIncrease = 4;
+var gameSpeed = 40;
+var speedIncrease = 3;
 
 var gameOver = function (name, score) {
     clearInterval(intervalId);
 
-    ctx.font = "60px Courier";
+    ctx.font = "60px Open Sans";
     ctx.fillStyle = "Black";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("Game Over", width / 2, height / 3);
 
-var scores = JSON.parse(localStorage.getItem("snakeScores")) || [];
-scores.push({ name: name, score: score });
-scores.sort((a, b) => b.score - a.score); 
+    var scores = JSON.parse(localStorage.getItem("snakeScores")) || [];
+    scores.push({ name: name, score: score });
+    scores.sort((a, b) => b.score - a.score); 
     
     localStorage.setItem("snakeScores", JSON.stringify(scores));
 
-    ctx.font = "20px Courier";
-    ctx.fillText("Winner:", width / 2, height / 2);
+    ctx.font = "20px Open Sans";
+    ctx.fillText("TOP Winners:", width / 2, height / 2);
     
     let validScores = scores.filter(record => Number.isInteger(record.score));
 
@@ -49,23 +49,41 @@ scores.sort((a, b) => b.score - a.score);
             (height / 2) + 30 + (index * 25)
         );
     });
+
+    var restartButton = document.createElement("button");
+    restartButton.textContent = "Restart Game";
+    restartButton.style.backgroundColor = "grey";
+    restartButton.style.borderRadius = "10px";
+    restartButton.style.position = "absolute";
+    restartButton.style.left = "50%";
+    restartButton.style.top = (height / 2) + 200 + "px";
+    restartButton.style.transform = "translateX(-50%)";
+    restartButton.style.padding = "10px 20px";
+    restartButton.style.font = " 20 px Open Sans";
+    restartButton.style.cursor = "pointer";
+    document.body.appendChild(restartButton);
+
+    restartButton.addEventListener("click", function() {
+        restartButton.remove();
+        startGame();
+    });
 };
 
-
+//////////////////////////
 var drawBorder = function () {
-    ctx.fillStyle = "Gray";
-    ctx.fillRect(0,0, width, blockSize);
+    ctx.fillStyle = "Grey";
+    ctx.fillRect(0, 0, width, blockSize);
     ctx.fillRect(0, height - blockSize, width, blockSize);
-    ctx.fillRect(0,0, blockSize, height);
+    ctx.fillRect(0, 0, blockSize, height);
     ctx.fillRect(width - blockSize, 0, blockSize, height);
 };
 
 var drawScore = function () {
-    ctx.font = "20px Courier";
+    ctx.font = "20px Open Sans";
     ctx.fillStyle = "Black";
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
-    ctx.fillText("Score:" + score, blockSize, blockSize);
+    ctx.fillText("Score: " + score, blockSize*1.2, blockSize/10);
 };
 
 var circle = function (x, y, radius, fillCircle) {
@@ -114,7 +132,7 @@ var Snake = function () {
 
 Snake.prototype.draw = function () {
     for (var i = 0; i< this.segments.length; i++) {
-        this.segments[i].drawSquare("Blue");
+        this.segments[i].drawSquare("#00FF00");
     }
 };
 
@@ -148,31 +166,31 @@ Snake.prototype.move = function () {
         clearInterval(intervalId);
         intervalId = setInterval(function () {
             ctx.clearRect(0, 0, width, height);
-            ctx.fillStyle = "white";
+            ctx.fillStyle = "rgba(0, 50, 0, 0.5)";
             ctx.fillRect(0, 0, width, height);
-            drawScore();
             snake.move();
             snake.draw();
             apple.draw();
             drawBorder();
+            drawScore();
         }, gameSpeed);
     } else {
         this.segments.pop();
     }
 };
-
+////////////////////////////
 Snake.prototype.checkCollision = function (head) {
     var leftCollision = (head.col === 0);
     var topCollision = (head.row === 0);
-    var rightCollision = (head.col === widthInBlocks -1);
-    var bottomCollision = (head.row === heightInBlocks -1);
+    var rightCollision = (head.col === widthInBlocks - 1);
+    var bottomCollision = (head.row === heightInBlocks - 1);
 
     var wallCollision = leftCollision || topCollision ||
     rightCollision || bottomCollision;
 
     var selfCollision = false;
 
-    for (var i = 0; i< this.segments.length; i++) {
+    for (var i = 0; i < this.segments.length; i++) {
         if (head.equal(this.segments[i])) {
             selfCollision = true;
         }
@@ -200,15 +218,13 @@ var Apple = function () {
 };
 
 Apple.prototype.draw = function () {
-    this.position.drawCircle("LimeGreen");
+    this.position.drawCircle("Red");
 };
 
 Apple.prototype.move = function () {
-    var randomCol = Math.floor(Math.random() *
-(widthInBlocks - 2)) +1;
-    var randomRow = Math.floor(Math.random() *
-(heightInBlocks - 2)) +1;
-this.position = new Block(randomCol, randomRow);
+    var randomCol = Math.floor(Math.random() * (widthInBlocks - 2)) + 1;
+    var randomRow = Math.floor(Math.random() * (heightInBlocks - 2)) + 1;
+    this.position = new Block(randomCol, randomRow);
 };
 
 var snake = new Snake();
@@ -224,13 +240,13 @@ var startGame = function() {
     
     intervalId = setInterval(function () {
         ctx.clearRect(0, 0, width, height);
-        ctx.fillStyle = "white";
+        ctx.fillStyle = "rgba(0, 50, 0, 0.5)";
         ctx.fillRect(0, 0, width, height);
-        drawScore();
         snake.move();
         snake.draw();
         apple.draw();
         drawBorder();
+        drawScore();
     }, gameSpeed);
 };
 
@@ -248,4 +264,25 @@ $("body").keydown(function (event) {
     }
 });
 
-startGame();
+var startButton = document.createElement("button");
+startButton.textContent = "Start Game";
+startButton.style.backgroundColor = "grey";
+startButton.style.borderRadius = "10px";
+startButton.style.position = "absolute";
+startButton.style.left = "50%";
+startButton.style.top = "50%";
+startButton.style.transform = "translate(-50%, -50%)";
+startButton.style.padding = "10px 20px";
+startButton.style.font = "20px Open Sans";
+startButton.style.cursor = "pointer";
+document.body.appendChild(startButton);
+
+startButton.addEventListener("click", function() {
+    startButton.style.display = "none"; // Hide button when game starts
+    startGame();
+});
+
+// Initial canvas setup
+ctx.fillStyle = "rgba(0, 50, 0, 0.5)";
+ctx.fillRect(0, 0, width, height);
+drawBorder();
