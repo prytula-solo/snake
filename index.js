@@ -144,14 +144,26 @@ Snake.prototype.move = function () {
 
     if (this.direction === "right") {
         newHead = new Block(head.col + 1, head.row);
+        if (newHead.col >= widthInBlocks - 1) {
+            newHead = new Block(1, head.row); // Wrap to left side
+        }
     } else if (this.direction === "down") {
-        newHead = new Block(head.col, head.row +1);
+        newHead = new Block(head.col, head.row + 1);
+        if (newHead.row >= heightInBlocks - 1) {
+            newHead = new Block(head.col, 1); // Wrap to top
+        }
     } else if (this.direction === "left") {
-        newHead = new Block(head.col -1, head.row);
+        newHead = new Block(head.col - 1, head.row);
+        if (newHead.col <= 0) {
+            newHead = new Block(widthInBlocks - 2, head.row); // Wrap to right side
+        }
     } else if (this.direction === "up") {
-        newHead = new Block(head.col, head.row -1);
+        newHead = new Block(head.col, head.row - 1);
+        if (newHead.row <= 0) {
+            newHead = new Block(head.col, heightInBlocks - 2); // Wrap to bottom
+        }
     }
-    
+
     if (this.checkCollision(newHead)) {
         gameOver(playerName, score);
         return;
@@ -180,23 +192,15 @@ Snake.prototype.move = function () {
 };
 ////////////////////////////
 Snake.prototype.checkCollision = function (head) {
-    var leftCollision = (head.col === 0);
-    var topCollision = (head.row === 0);
-    var rightCollision = (head.col === widthInBlocks - 1);
-    var bottomCollision = (head.row === heightInBlocks - 1);
-
-    var wallCollision = leftCollision || topCollision ||
-    rightCollision || bottomCollision;
-
     var selfCollision = false;
 
-    for (var i = 0; i < this.segments.length; i++) {
+    for (var i = 1; i < this.segments.length; i++) {
         if (head.equal(this.segments[i])) {
             selfCollision = true;
         }
     }
 
-    return wallCollision || selfCollision;
+    return selfCollision;
 };
 
 Snake.prototype.setDirection = function (newDirection) {
@@ -257,11 +261,28 @@ var directions = {
     40: "down"
 };
 
+var keysPressed = {};
+
 $("body").keydown(function (event) {
-    var newDirection = directions[event.keyCode];
-    if (newDirection !== undefined) {
-        snake.setDirection(newDirection);
+    keysPressed[event.keyCode] = true;
+    
+    // Handle each direction independently
+    if (keysPressed[38]) { // up
+        snake.setDirection("up");
     }
+    if (keysPressed[40]) { // down
+        snake.setDirection("down");
+    }
+    if (keysPressed[37]) { // left
+        snake.setDirection("left");
+    }
+    if (keysPressed[39]) { // right
+        snake.setDirection("right");
+    }
+});
+
+$("body").keyup(function (event) {
+    delete keysPressed[event.keyCode];
 });
 
 var startButton = document.createElement("button");
