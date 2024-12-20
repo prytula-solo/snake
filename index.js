@@ -23,8 +23,15 @@ var gameSpeed = 40;  // Initial game speed (milliseconds)
 var speedIncrease = 3;  // Amount to increase speed by when eating apple
 var isPaused = false;  // Track if game is paused
 
+// Add near the top with other global variables
+var gameMusic = document.getElementById("gameMusic");
+
 // Handle game over state and display final score
 var gameOver = function (name, score) {
+    // Stop music
+    gameMusic.pause();
+    gameMusic.currentTime = 0;
+    
     pauseButton.style.display = "none";  // Hide pause button
     clearInterval(intervalId);  // Stop game loop
 
@@ -255,6 +262,9 @@ var startGame = function() {
     pauseButton.style.display = "block";
     pauseButton.textContent = "Pause";
     
+    // Start playing music
+    gameMusic.play();
+    
     if (!playerName) {
         playerName = prompt("Enter your name:", "Player") || "Player";
     }
@@ -334,6 +344,9 @@ pauseButton.addEventListener("click", function() {
     pauseButton.textContent = isPaused ? "Continue" : "Pause";
     
     if (!isPaused) {
+        // Resume music
+        gameMusic.play();
+        
         intervalId = setInterval(function () {
             ctx.clearRect(0, 0, width, height);
             ctx.fillStyle = "rgba(0, 50, 0, 0.5)";
@@ -345,6 +358,9 @@ pauseButton.addEventListener("click", function() {
             drawScore();
         }, gameSpeed);
     } else {
+        // Pause music
+        gameMusic.pause();
+        
         clearInterval(intervalId);
     }
 });
