@@ -1,64 +1,57 @@
-// Canvas setup - Get the canvas element and its context for drawing
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 
-// Set canvas dimensions
+//Задала розміри field для змійки
 canvas.width = 500;
 canvas.height = 500;
 
-// Store canvas dimensions for easier access
 var width = canvas.width;
 var height = canvas.height;
 
-// Game grid configuration
-var blockSize = 20;  // Size of each grid block in pixels
-var widthInBlocks = Math.floor(width / blockSize);  // Number of blocks horizontally
-var heightInBlocks = Math.floor(height / blockSize);  // Number of blocks vertically
+//Ігрова сітка
+var blockSize = 20;
+var widthInBlocks = Math.floor(width / blockSize);
+var heightInBlocks = Math.floor(height / blockSize);
 
-// Game state variables
-var score = 0;  // Player's current score
-var playerName = "";  // Store player's name
-var intervalId;  // Store game loop interval ID
-var gameSpeed = 40;  // Initial game speed (milliseconds)
-var speedIncrease = 3;  // Amount to increase speed by when eating apple
-var isPaused = false;  // Track if game is paused
+var score = 0;
+var playerName = "";
+var intervalId;
+var gameSpeed = 40;  //швидкість змійки
+var speedIncrease = 3; //зміна швидкості з кожним з'їденим яблуком
+var isPaused = false;
 
-// Add near the top with other global variables
 var gameMusic = document.getElementById("gameMusic");
 
-// Handle game over state and display final score
 var gameOver = function (name, score) {
-    // Stop music
     gameMusic.pause();
     gameMusic.currentTime = 0;
     
-    pauseButton.style.display = "none";  // Hide pause button
-    clearInterval(intervalId);  // Stop game loop
+    pauseButton.style.display = "none";
+    clearInterval(intervalId);
 
-    // Display "Game Over" text
+    //текст game over
     ctx.font = "60px Open Sans";
     ctx.fillStyle = "Black";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("Game Over", width / 2, height / 3);
 
-    // Save and sort high scores
+    //зберегти рекорди
     var scores = JSON.parse(localStorage.getItem("snakeScores")) || [];
     scores.push({ name: name, score: score });
     scores.sort((a, b) => b.score - a.score); 
     localStorage.setItem("snakeScores", JSON.stringify(scores));
 
-    // Display top winners
+    //текст топ переможців
     ctx.font = "20px Open Sans";
     ctx.fillText("TOP Winners:", width / 2, height / 2);
     
-    // Filter valid scores and show top 3
+    //показати топ 3 переможців
     let validScores = scores.filter(record => Number.isInteger(record.score));
     if (validScores.length > 3) { 
         validScores = validScores.slice(0, 3);
     }
 
-    // Display each winner's score
     validScores.forEach((record, index) => {
         ctx.fillText(
             `${index + 1}. ${record.name}: ${record.score}`,
@@ -67,7 +60,7 @@ var gameOver = function (name, score) {
         );
     });
 
-    // Create and display restart button
+    //кнопка почати спочатку
     var restartButton = document.createElement("button");
     restartButton.textContent = "Restart Game";
     restartButton.classList.add("game-button", "restart-button");
@@ -79,16 +72,16 @@ var gameOver = function (name, score) {
     });
 };
 
-// Draw the game border
+//розміри сірого field для змійки
 var drawBorder = function () {
     ctx.fillStyle = "Grey";
-    ctx.fillRect(0, 0, width, blockSize);  // Top border
-    ctx.fillRect(0, height - blockSize, width, blockSize);  // Bottom border
-    ctx.fillRect(0, 0, blockSize, height);  // Left border
-    ctx.fillRect(width - blockSize, 0, blockSize, height);  // Right border
+    ctx.fillRect(0, 0, width, blockSize); //верх
+    ctx.fillRect(0, height - blockSize, width, blockSize);  //низ
+    ctx.fillRect(0, 0, blockSize, height);  //зліва
+    ctx.fillRect(width - blockSize, 0, blockSize, height);  //справа
 };
 
-// Draw the current score
+//score зліва зверху
 var drawScore = function () {
     ctx.font = "20px Open Sans";
     ctx.fillStyle = "Black";
@@ -97,7 +90,6 @@ var drawScore = function () {
     ctx.fillText("Score: " + score, blockSize*1.2, blockSize/10);
 };
 
-// Helper function to draw circles
 var circle = function (x, y, radius, fillCircle) {
     ctx.beginPath();
     ctx.arc(x, y, radius, 0, Math.PI * 2, false);
@@ -108,13 +100,11 @@ var circle = function (x, y, radius, fillCircle) {
     }
 };
 
-// Block class - represents a single grid block
 var Block = function (col, row) {
     this.col = col;
     this.row = row;
 };
 
-// Methods for Block class
 Block.prototype.drawSquare = function (color) {
     var x = this.col * blockSize;
     var y = this.row * blockSize;
@@ -133,55 +123,53 @@ Block.prototype.equal = function (otherBlock) {
     return this.col === otherBlock.col && this.row === otherBlock.row;
 };
 
-// Snake class - represents the snake in the game
+//змійка
 var Snake = function () {
     this.segments = [
-        new Block(7,5),  // Head
-        new Block(6,5),  // Body
-        new Block(5,5),  // Tail
+        new Block(7,5),  //голова
+        new Block(6,5),  //тіло
+        new Block(5,5),  //хвіст
     ];
     this.direction = "right";
     this.nextDirection = "right";
 };
 
-// Draw the snake
 Snake.prototype.draw = function () {
     for (var i = 0; i< this.segments.length; i++) {
         this.segments[i].drawSquare("#00FF00");
     }
 };
 
-// Move the snake and handle collisions
+//рухи змійки
 Snake.prototype.move = function () {
     var head = this.segments[0];
     var newHead;
 
     this.direction = this.nextDirection;
 
-    // Calculate new head position based on direction
+    //рухи голови
     if (this.direction === "right") {
         newHead = new Block(head.col + 1, head.row);
         if (newHead.col >= widthInBlocks - 1) {
-            newHead = new Block(1, head.row); // Wrap to left side
+            newHead = new Block(1, head.row); //наліво
         }
     } else if (this.direction === "down") {
         newHead = new Block(head.col, head.row + 1);
         if (newHead.row >= heightInBlocks - 1) {
-            newHead = new Block(head.col, 1); // Wrap to top
+            newHead = new Block(head.col, 1); //наверх
         }
     } else if (this.direction === "left") {
         newHead = new Block(head.col - 1, head.row);
         if (newHead.col <= 0) {
-            newHead = new Block(widthInBlocks - 2, head.row); // Wrap to right side
+            newHead = new Block(widthInBlocks - 2, head.row); //направо
         }
     } else if (this.direction === "up") {
         newHead = new Block(head.col, head.row - 1);
         if (newHead.row <= 0) {
-            newHead = new Block(head.col, heightInBlocks - 2); // Wrap to bottom
+            newHead = new Block(head.col, heightInBlocks - 2); //вниз
         }
     }
 
-    // Check for collision with self
     if (this.checkCollision(newHead)) {
         gameOver(playerName, score);
         return;
@@ -189,7 +177,7 @@ Snake.prototype.move = function () {
 
     this.segments.unshift(newHead);
 
-    // Handle apple collision
+    //удар об яблуко
     if (newHead.equal(apple.position)) {
         score++;
         apple.move();
@@ -210,7 +198,7 @@ Snake.prototype.move = function () {
     }
 };
 
-// Check if snake collides with itself
+//удар об себе
 Snake.prototype.checkCollision = function (head) {
     var selfCollision = false;
     for (var i = 1; i < this.segments.length; i++) {
@@ -221,7 +209,7 @@ Snake.prototype.checkCollision = function (head) {
     return selfCollision;
 };
 
-// Set snake's direction ensuring it can't reverse into itself
+//щоб не повернулась сама в себе
 Snake.prototype.setDirection = function (newDirection) {
     if (this.direction === "up" && newDirection === "down") {
         return;
@@ -235,34 +223,29 @@ Snake.prototype.setDirection = function (newDirection) {
     this.nextDirection = newDirection;
 };
 
-// Apple class - represents the apple in the game
 var Apple = function () {
     this.position = new Block(10,10);
 };
 
-// Draw the apple
 Apple.prototype.draw = function () {
     this.position.drawCircle("Red");
 };
 
-// Move apple to new random position
+//поява яблука в рандомному місці
 Apple.prototype.move = function () {
     var randomCol = Math.floor(Math.random() * (widthInBlocks - 2)) + 1;
     var randomRow = Math.floor(Math.random() * (heightInBlocks - 2)) + 1;
     this.position = new Block(randomCol, randomRow);
 };
 
-// Create initial snake and apple
 var snake = new Snake();
 var apple = new Apple();
 
-// Initialize and start the game
 var startGame = function() {
     isPaused = false;
     pauseButton.style.display = "block";
     pauseButton.textContent = "Pause";
     
-    // Start playing music
     gameMusic.play();
     
     if (!playerName) {
@@ -286,7 +269,7 @@ var startGame = function() {
     }, gameSpeed);
 };
 
-// Map keyboard codes to directions
+//клавіатура
 var directions = {
     37: "left",
     38: "up",
@@ -294,34 +277,31 @@ var directions = {
     40: "down"
 };
 
-// Track currently pressed keys
 var keysPressed = {};
 
-// Handle keydown events for snake movement
+//рухи змійки завдяки клавішам
 $("body").keydown(function (event) {
     keysPressed[event.keyCode] = true;
     
-    // Handle each direction independently
-    if (keysPressed[38]) { // up
+    if (keysPressed[38]) {
         snake.setDirection("up");
     }
-    if (keysPressed[40]) { // down
+    if (keysPressed[40]) {
         snake.setDirection("down");
     }
-    if (keysPressed[37]) { // left
+    if (keysPressed[37]) {
         snake.setDirection("left");
     }
-    if (keysPressed[39]) { // right
+    if (keysPressed[39]) {
         snake.setDirection("right");
     }
 });
 
-// Clear keys when released
 $("body").keyup(function (event) {
     delete keysPressed[event.keyCode];
 });
 
-// Create and setup start button
+//почати гру
 var startButton = document.createElement("button");
 startButton.textContent = "Start Game";
 startButton.classList.add("game-button", "start-button");
@@ -332,19 +312,17 @@ startButton.addEventListener("click", function() {
     startGame();
 });
 
-// Create and setup pause button
+//зупинити гру
 var pauseButton = document.createElement("button");
 pauseButton.textContent = "Pause";
 pauseButton.classList.add("game-button", "pause-button");
 document.body.appendChild(pauseButton);
 
-// Handle pause/resume functionality
 pauseButton.addEventListener("click", function() {
     isPaused = !isPaused;
     pauseButton.textContent = isPaused ? "Continue" : "Pause";
     
     if (!isPaused) {
-        // Resume music
         gameMusic.play();
         
         intervalId = setInterval(function () {
@@ -358,14 +336,12 @@ pauseButton.addEventListener("click", function() {
             drawScore();
         }, gameSpeed);
     } else {
-        // Pause music
         gameMusic.pause();
         
         clearInterval(intervalId);
     }
 });
 
-// Initial game board setup
 ctx.fillStyle = "rgba(0, 50, 0, 0.5)";
 ctx.fillRect(0, 0, width, height);
 drawBorder();
