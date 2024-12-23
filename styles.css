@@ -56,3 +56,12 @@
     font: 20px "Open Sans";
     cursor: pointer;
  }
+
+ .volume-slider {
+   position: absolute;
+   left: calc(50% + 280px);
+   top: calc(50% - 185px);
+   width: 100px;
+   accent-color: grey;
+   display: none;
+}

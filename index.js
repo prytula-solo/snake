@@ -22,11 +22,30 @@ var isPaused = false;
 
 var gameMusic = document.getElementById("gameMusic");
 
+var volumeSlider = document.createElement("input");
+volumeSlider.type = "range";
+volumeSlider.min = "0";
+volumeSlider.max = "100";
+volumeSlider.value = "50";
+volumeSlider.classList.add("volume-slider");
+document.body.appendChild(volumeSlider);
+
+var volumeLabel = document.createElement("label");
+volumeLabel.classList.add("volume-label");
+document.body.insertBefore(volumeLabel, volumeSlider);
+
+volumeSlider.addEventListener("input", function() {
+    gameMusic.volume = this.value / 100;
+});
+
+gameMusic.volume = volumeSlider.value / 100;
+
 var gameOver = function (name, score) {
     gameMusic.pause();
     gameMusic.currentTime = 0;
     
     pauseButton.style.display = "none";
+    volumeSlider.style.display = "none";
     clearInterval(intervalId);
 
     //текст game over
@@ -244,6 +263,7 @@ var apple = new Apple();
 var startGame = function() {
     isPaused = false;
     pauseButton.style.display = "block";
+    volumeSlider.style.display = "block";
     pauseButton.textContent = "Pause";
     
     gameMusic.play();
